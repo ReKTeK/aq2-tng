@@ -304,7 +304,7 @@
 
 #include "g_local.h"
 #include "cgf_sfx_glass.h"
-
+#include <uuid/uuid.h>
 
 qboolean team_game_going = false;	// is a team game going right now?
 qboolean team_round_going = false;	// is an actual round of a team game going right now?
@@ -2930,6 +2930,54 @@ void A_ScoreboardMessage (edict_t * ent, edict_t * killer)
 	gi.WriteString(string);
 }
 
+/*
+==================
+Match Stats
+=================
+*/
+void uuid_generate(uuid_t out);
+void uuid_generate_random(uuid_t out);
+void uuid_generate_time(uuid_t out);
+int uuid_generate_time_safe(uuid_t out);
+
+void EndOfRoundStats(int t1_score, int t2_score, int t3_score)
+
+{
+	int mod;
+	int loc;
+	int gametime = 0;
+	int t1_score, t2_score, t3_score = 0;
+	char match_id = uuid_generate()
+	char msg[1024];
+	gametime = level.matchTime;
+
+	strcpy(
+		msg,
+		"{\"match\":{\"sid\":\"%s\",\"mid\":\"%s\",\"t\":\"%i\",\"m\":\"%s\",\"tp\":\"%i\",\"tdm\":%i,\"dm\":%i,\"ctf\":\"%i\",\"3teams\":\"%i\",\"dom\":\"%i\",\"dark\":%i,\"mm\":%i,\"tourney\":%i,\"t1\":%i,\"t2\":%i,\"t3\":%i}}\n"
+	);
+
+	Com_Printf(
+		msg,
+		server_id->string,
+		match_id->string,
+		gametime,
+		level.mapname,
+		teamplay->value,
+		teamdm->value,
+		deathmatch->value,
+		ctf->value,
+		use_3teams->value,
+		dom->value,
+		darkmatch->value,
+		matchmode->value,
+		use_tourney->value,
+		t1_score,
+		t2_score,
+		t3_score
+	);
+}
+// End Match Stats
+
 // called when we enter the intermission
 void TallyEndOfLevelTeamScores (void)
 {
@@ -2947,6 +2995,9 @@ void TallyEndOfLevelTeamScores (void)
 
 		teams[game.clients[i].resp.team].total += game.clients[i].resp.score;
 	}
+
+	EndOfRoundStats(teams[TEAM1].total, teams[TEAM2].total, teams[TEAM3].total)
+
 }
 
 

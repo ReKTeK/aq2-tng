@@ -1502,6 +1502,51 @@ void LogKill(edict_t *self, edict_t *inflictor, edict_t *attacker)
 
 /*
 ==================
+LogAward
+=================
+*/
+void LogAward(edict_t *self, edict_t *attacker, int award)
+{
+	int mod;
+	int loc;
+	int gametime = 0;
+	int award = 0;
+	char match_id[37];
+	char msg[1024];
+	char k[24];
+	char kn[24];
+	char ki[24];
+
+	if (team_round_going)
+	{
+		strcpy(k, Info_ValueForKey(self->client->pers.userinfo, "steamid"));
+		strcpy(kn, Info_ValueForKey(attacker->client->pers.userinfo, "name"));
+		strcpy(ki, Info_ValueForKey(attacker->client->pers.userinfo, "ip"));
+
+		gametime = level.matchTime;
+
+		strcpy(
+			msg,
+			"{\"frag\":{\"sid\":\"%s\",\"mid\":\"%s\",\"a\":\"%i\",\"k\":\"%s\",\"kn\":\"%s\",\"ki\":%s,\"w\":%i,\"i\":%i,\"gt\":%d}}\n"
+		);
+
+		Com_Printf(
+			msg,
+			server_id->string,
+			match_id,
+			award,
+			k,
+			kn,
+			ki,
+			mod,
+			attacker->client->pers.chosenItem->typeNum,
+			gametime
+		);
+	}
+}
+
+/*
+==================
 player_die
 ==================
 */
@@ -1509,7 +1554,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 {
 	int n, mod;
 
-	if (kill_logs->value) {
+	if (stat_logs->value) {
 		LogKill(self, inflictor, attacker);
 	}
 
